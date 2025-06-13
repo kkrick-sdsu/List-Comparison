@@ -3,33 +3,37 @@ import csv
 
 # Attempts to read in the filepath. Assumes that the file is a CSV with ',' as the separator.
 # If successful, returns an array of objects, one for each of the rows (excluding headers).
-# Otherwise returns an empty string
+# Otherwise returns an empty list
 def read_file(filepath):
     try:
-        file = open(filepath)
         file_contents = []
-        csv_reader = csv.DictReader(file)
-        
-        for row in csv_reader:
-            file_contents.append(row)
+        with open(filepath, newline="") as file:
+            csv_reader = csv.DictReader(file)
+
+            for row in csv_reader:
+                file_contents.append(row)
 
         return file_contents
-    except:
-        return ""
+    except Exception:
+        return []
 
 # Given a file and a column name returns a list of that column's rows
 def column_to_list(file_contents, column):
     column_list = []
     for row in file_contents:
-        column_list.append(row[column])
+        if column in row:
+            column_list.append(row[column])
     return column_list
 
 # Get filepath and column names for each list of elements
 def get_input():
     input_dict = {}
-    operations = {"unique", "intersection", "union"}
+    valid_operations = {"unique", "intersection", "union"}
 
-    input_dict["operations"] = input(f"Valid operations are: {operations}. Enter which operation(s) to perform (separating multiple operations with a comma): ").split(",")
+    operations_input = input(
+        f"Valid operations are: {valid_operations}. Enter which operation(s) to perform (separating multiple operations with a comma): "
+    )
+    input_dict["operations"] = [op.strip() for op in operations_input.split(",")]
 
     input_dict["list_one_filepath"] = input("Enter path to file for list one elements: ")
     input_dict["list_one_column"] = input("Enter column name for list one elements: ")
@@ -90,21 +94,24 @@ def union_elements(list_one, list_two):
     return list_elements_union
 
 def output_elements(element_list, column_name, output_filepath):
-    with open(output_filepath, 'w', newline='') as csv_output_file:
+    with open(output_filepath, "w", newline="") as csv_output_file:
         csv_writer = csv.writer(csv_output_file)
-        csv_writer.writerow(column_name)
-        csv_writer.writerows(element_list)
+        # Write header row
+        csv_writer.writerow([column_name])
+
+        for element in element_list:
+            csv_writer.writerow([element])
 
 def list_comparison():
-    input = get_input()
+    user_input = get_input()
 
-    operations = input["operations"]
+    operations = user_input["operations"]
 
-    list_one_filepath = input["list_one_filepath"]
-    list_two_filepath = input["list_two_filepath"]
+    list_one_filepath = user_input["list_one_filepath"]
+    list_two_filepath = user_input["list_two_filepath"]
 
-    list_one_column = input["list_one_column"]
-    list_two_column = input["list_two_column"]
+    list_one_column = user_input["list_one_column"]
+    list_two_column = user_input["list_two_column"]
 
     list_one_file_contents = read_file(list_one_filepath)
     list_two_file_contents = read_file(list_two_filepath)
@@ -122,10 +129,16 @@ def list_comparison():
     
     if "intersection" in operations:
         list_elements_intersection = intersection_elements(list_one, list_two)
-        output_elements(list_elements_intersection, "list_elements_intersection", ".list_elements_intersection.csv")
+        output_elements(list_elements_intersection, "list_elements_intersection", "./list_elements_intersection.csv")
     
     if "union" in operations:
         list_elements_union = union_elements(list_one, list_two)
-        output_elements(list_elements_union, "list_elements_union", "./list_elements_union.csv")
+        output_elements(
+            list_elements_union,
+            "list_elements_union",
+            "./list_elements_union.csv",
+        )
 
-list_comparison()
+
+if __name__ == "__main__":
+    list_comparison()
