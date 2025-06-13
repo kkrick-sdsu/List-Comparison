@@ -21,7 +21,8 @@ def read_file(filepath):
 def column_to_list(file_contents, column):
     column_list = []
     for row in file_contents:
-        column_list.append(row[column])
+        if column in row:
+            column_list.append(row[column])
     return column_list
 
 # Get filepath and column names for each list of elements
@@ -132,6 +133,12 @@ def list_comparison():
     
     if "union" in operations:
         list_elements_union = union_elements(list_one, list_two)
-        output_elements(list_elements_union, "list_elements_union", "./list_elements_union.csv")
+        output_elements(
+            list_elements_union,
+            "list_elements_union",
+            "./list_elements_union.csv",
+        )
 
-list_comparison()
+
+if __name__ == "__main__":
+    list_comparison()
